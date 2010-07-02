@@ -1,0 +1,31 @@
+<html>
+<head></head>
+<body>
+  <wicket:extend>
+  <div class="grid_9 alpha">
+        <div class="auth grid_4 prefix_1 alpha" id="signin">
+            <h2 class="grid_4">Sign In</h2>
+            <form wicket:id='signin'>
+                <ul>
+                    <li><label for="username">Username: </label><input id="username" type="text" wicket:id="username" /></li>
+                    <li><label for="password">Password: </label><input id="password" type="text" wicket:id="password" /></li>
+                </ul>
+                <input type="submit" value="Sign In"/>
+            </form>
+        </div>
+
+        <div class="auth grid_4 omega" id="signup">
+            <h2 class="grid_4">Sign Up</h2>
+            <form wicket:id='signup'>
+                <ul>
+                    <li><label for="new_username">New&nbsp;Username: </label><input id="new_username" type="text" wicket:id="new_username" /></li>
+                    <li><label for="password1">Password: </label><input id="password1" type="text" wicket:id="password1" /></li>
+                    <li><label for="password2">Password&nbsp;Again: </label><input id="password2" type="text" wicket:id="password2" /></li>
+                </ul>
+                <input type="submit" value="Sign Up" />
+            </form>
+        </div>
+    </div>
+  </wicket:extend>
+</body>
+</html>

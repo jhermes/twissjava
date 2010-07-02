@@ -1,0 +1,45 @@
+<html>
+<head></head>
+<body>
+  <wicket:extend>
+    <!-- {% if request.user.is_authenticated %} -->
+        <form method="POST" id="poster">
+            <div class="grid_9 alpha">
+                <textarea maxlength="140" name="body" type="text" id="id_body"></textarea>
+            </div>
+            <input type="submit" value="Post Tweet" class="grid_3 omega">
+            <div class="clear"></div>
+        </form>
+    <!-- {% else %}
+        <h2 class="grid_4 suffix_5">Public Timeline</h2>
+    {% endif %} -->
+    <ul id="timeline" class="grid_9 alpha">
+        <!-- {% for tweet in tweets %} --
+            <li>
+                <a href="{% url userline tweet.uname %}" class="username">{{ tweet.uname }}</a>
+                <span class="body">{{ tweet.body|urlize }}</span>
+            </li>
+        {% empty %}
+            <li>There are no tweets yet.  Make sure to post one!</li>
+        {% endfor %}
+        {% if next %}
+            <li class="more"><a href="?start={{ next }}">More</a></li>
+        {% endif %}
+        -->
+         <li>
+           <a href="hermes" class="username">hermes</a>
+           <span class="body">Test!</span>
+         </li>
+    </ul>
+<!--{% endblock %}
+
+{% block sidebar %}
+    {% if not request.user.is_authenticated %}
+        <a href="{% url login %}">Log in to post a tweet</a>
+    {% endif %}
+{% endblock %}
+-->
+
+  </wicket:extend>
+</body>
+</html>
