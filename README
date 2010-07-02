@@ -1,1 +1,20 @@
 TWISSJAVA: Twitter on Cassandra in Java.
+
+Deps:
+ + Maven: this will load our build deps.
+   + Cassandra 0.6: the important thing.
+   + Hector: this is how we talk to the important thing.
+   + Wicket: this is how we show other people the important thing.
+
+Setup:
+ + `mvn archetype:create 
+     -DarchetypeGroupId=org.apache.wicket 
+     -DarchetypeArtifactId=wicket-archetype-quickstart 
+     -DarchetypeVersion=1.4.9 
+     -DgroupId=example 
+     -DartifactId=twissjava`
+ + Replace default files with Twissjava files.
+ + make
+ + java src/test/java/example/Start.java
+     (starts Jetty, the appserver that comes with Wicket)
+ + localhost:8080 :)
