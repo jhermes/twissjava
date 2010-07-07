@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import example.models.Timeline;
 import example.models.Tweet;
 import example.models.User;
 import org.apache.cassandra.thrift.KeyRange;
@@ -15,6 +16,7 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.WebPage;
 
+import org.wyki.cassandra.pelops.Mutator;
 import org.wyki.cassandra.pelops.Pelops;
 import org.wyki.cassandra.pelops.Selector;
 
@@ -29,10 +31,10 @@ public abstract class Base extends WebPage {
 
     //UI settings
     public Base(final PageParameters parameters) {
-        add(CSSPackageResource.getHeaderContribution(HomePage.class, "960.css"));
-        add(CSSPackageResource.getHeaderContribution(HomePage.class, "reset.css"));
-        add(CSSPackageResource.getHeaderContribution(HomePage.class, "screen.css"));
-        add(CSSPackageResource.getHeaderContribution(HomePage.class, "text.css"));
+        add(CSSPackageResource.getHeaderContribution(Base.class, "960.css"));
+        add(CSSPackageResource.getHeaderContribution(Base.class, "reset.css"));
+        add(CSSPackageResource.getHeaderContribution(Base.class, "screen.css"));
+        add(CSSPackageResource.getHeaderContribution(Base.class, "text.css"));
     }
 
     //
@@ -46,6 +48,13 @@ public abstract class Base extends WebPage {
     private Selector makeSel() {
         return Pelops.createSelector("Twissjava Pool", "Twissandra");
     }
+    private Mutator makeMut() {
+        return Pelops.createMutator("Twissjava Pool", "Twissandra");
+    }
+    private Tweet makeTweet(byte[] key, List<Column> tweetcols) {
+        return new Tweet(key, bToS(tweetcols.get(0).value), bToS(tweetcols.get(1).value));
+    }
+
 
     //Helpers
     private List<String> getFriendOrFollowerUnames(String COL_FAM, String uname, int count) {
@@ -65,7 +74,7 @@ public abstract class Base extends WebPage {
         return unames;
     }
 
-    private FIXME getLine(String COL_FAM, String uname, String startkey, int count) {
+    private Timeline getLine(String COL_FAM, String uname, String startkey, int count) {
         Selector selector = makeSel();
         List<Column> timeline;
         try {
@@ -73,11 +82,12 @@ public abstract class Base extends WebPage {
         }
         catch (Exception e) {
             log.error("Unable to retrieve timeline for uname: " + uname);
-            return Collections.emptyList();
+            return null;
         }
+        Long mintimestamp = null;
         if (timeline.size() > count) {
             //find min timestamp
-            long mintimestamp = Long.MAX_VALUE;
+            mintimestamp = Long.MAX_VALUE;
             Column removeme = timeline.get(0); //This cannot fail. Count is 0+, and size is thus 1+. Only needed for initialization.
             for (Column c : timeline) {
                 long ctime = ByteBuffer.wrap(c.name).getLong();
@@ -99,11 +109,14 @@ public abstract class Base extends WebPage {
         }
         catch (Exception e) {
             log.error("Unable to retrieve tweets from timeline for uname: " + uname);
-            return Collections.emptyList();
+            return null;
         }
-        //Order the tweets by the timeline ids
-        //Send the tweet name and body down to the page.
-        //Send the saved timestamp down as the paginator link.
+        //Order the tweets by the ordered tweetids
+        ArrayList<Tweet> ordered_tweets = new ArrayList<Tweet>(tweetids.size());
+        for (String tweetid : tweetids) {
+            ordered_tweets.add(makeTweet(tweetid.getBytes(),unordered_tweets.get(tweetid)));
+        }
+        return new Timeline(ordered_tweets, mintimestamp);
     }
 
 
@@ -168,17 +181,17 @@ public abstract class Base extends WebPage {
         return getUsersForUnames(followerUnames);
     }
 
-    public FIXME getTimeline(String uname) {
+    public Timeline getTimeline(String uname) {
         return getTimeline(uname, "", 40);
     }
-    public FIXME getTimeline(String uname, String startkey, int limit) {
+    public Timeline getTimeline(String uname, String startkey, int limit) {
         return getLine("TIMELINE", uname, startkey, limit);
     }
 
-    public FIXME getUserline(String uname) {
+    public Timeline getUserline(String uname) {
         return getUserline(uname, "", 40);
     }
-    public FIXME getUserline(String uname, String startkey, int limit) {
+    public Timeline getUserline(String uname, String startkey, int limit) {
         return getLine("USERLINE", uname, startkey, limit);
     }
 
@@ -193,12 +206,13 @@ public abstract class Base extends WebPage {
             return null;
         }
         //maketweet from cols and return
+        return makeTweet(tweetid.getBytes(),tweetcols);
     }
 
     public List<Tweet> getTweetsForTweetids(List<String> tweetids) {
         Selector selector = makeSel();
-        List<Tweet> tweets = Collections.emptyList();
         Map<String, List<Column>> data;
+        List<Tweet> tweets = Collections.emptyList();
         try {
             data = selector.getColumnsFromRows(tweetids, "TWEETS", new SlicePredicate(), RCL);
         }
@@ -207,61 +221,73 @@ public abstract class Base extends WebPage {
             return tweets;
         }
         //loop maketweet from cols and return
+        for (Map.Entry<String, List<Column>> datarow : data.entrySet()) {
+            tweets.add(makeTweet(datarow.getKey().getBytes(), datarow.getValue()));
+        }
+        return tweets;
     }
 
 
     //Data Writing
     public void saveUser(User user) {
-
+        Mutator mutator = makeMut();
+        mutator.writeColumn(bToS(user.getKey()), "USERS", mutator.newColumn("password",user.getPassword()));
+        try {
+            mutator.execute(WCL);
+        }
+        catch (Exception e) {
+            log.error("Unable to save user: " + bToS(user.getKey()));
+        }
     }
     public void saveTweet(Tweet tweet) {
+        long timestamp = System.currentTimeMillis();
+        Mutator mutator = makeMut();
 
+        //Insert the tweet into tweets cf
+        String key = bToS(tweet.getKey());
+        mutator.writeColumn(key, "TWEET", mutator.newColumn("uname",tweet.getUname()));
+        mutator.writeColumn(key, "TWEET", mutator.newColumn("body",tweet.getBody()));
+        //Insert into the user's timeline
+        mutator.writeColumn(tweet.getUname(), "USERLINE", mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        //Insert into the public timeline
+        mutator.writeColumn("PUBLIC", "USERLINE", mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        //Insert into all followers streams
+        List<String> followerUnames = getFollowerUnames(tweet.getUname());
+        followerUnames.add(tweet.getUname());
+        for (String follower : followerUnames) {
+           mutator.writeColumn(follower, "TIMELINE", mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        }
+        try {
+            mutator.execute(WCL);
+        }
+        catch (Exception e) {
+            log.error("Unable to save tweet: " + tweet.getUname() + ": " + tweet.getBody());
+        }
     }
+
     public void addFriends(String from_uname, List<String> to_unames) {
-
+        long timestamp = System.currentTimeMillis();
+        Mutator mutator = makeMut();
+        List<Column> friends = Collections.emptyList();
+        for (String uname : to_unames) {
+            friends.add(mutator.newColumn(uname, String.valueOf(timestamp)));
+            mutator.writeColumn(uname, "FOLLOWERS", mutator.newColumn(from_uname, String.valueOf(timestamp)));
+        }
+        mutator.writeColumns(from_uname, "FRIENDS", friends);
+        try {
+            mutator.execute(WCL);
+        }
+        catch (Exception e) {
+            log.error("Unable to add friendship from: " + from_uname + ", to: " + to_unames);
+        }
     }
+
     public void removeFriends(String from_uname, List<String> to_unames) {
-
+        Mutator mutator = makeMut();
+        for (String uname : to_unames) {
+            mutator.deleteColumn(from_uname, "FRIENDS", uname);
+            mutator.deleteColumn(uname, "FOLLOWERS", from_uname);
+        }
     }
- /**
-def save_user(uname, user):
-    """
-    Saves the user record.
-    """
-    USER.insert(str(uname), user)
-
-def save_tweet(tweet_id, uname, tweet):
-    """
-    Saves the tweet record.
-    """
-    # Generate a timestamp for the USER/TIMELINE
-    ts = _long(time.time() * 1e6)
-    # Insert the tweet, then into the user's timeline, then into the public one
-    TWEET.insert(str(tweet_id), tweet)
-    USERLINE.insert(str(uname), {ts: str(tweet_id)})
-    USERLINE.insert(PUBLIC_USERLINE_KEY, {ts: str(tweet_id)})
-    # Get the user's followers, and insert the tweet into all of their streams
-    follower_unames = [uname] + get_follower_unames(uname)
-    for follower_uname in follower_unames:
-        TIMELINE.insert(str(follower_uname), {ts: str(tweet_id)})
-
-def add_friends(from_uname, to_unames):
-    """
-    Adds a friendship relationship from one user to some others.
-    """
-    ts = str(int(time.time() * 1e6))
-    dct = OrderedDict(((str(uname), ts) for uname in to_unames))
-    FRIENDS.insert(str(from_uname), dct)
-    for to_uname in to_unames:
-        FOLLOWERS.insert(str(to_uname), {str(from_uname): ts})
-
-def remove_friends(from_uname, to_unames):
-    """
-    Removes a friendship relationship from one user to some others.
-    """
-    for uname in to_unames:
-        FRIENDS.remove(str(from_uname), column=str(uname))
-    for to_uname in to_unames:
-        FOLLOWERS.remove(str(to_uname), column=str(to_uname))
-*/
+    
 }
