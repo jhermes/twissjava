@@ -18,7 +18,7 @@ Setup:
      -DarchetypeVersion=1.4.9 
      -DgroupId=example 
      -DartifactId=twissjava`
- + Replace default files in the Wicket heirarchy with Twissjava 
+ + Replace default files in the Wicket hierarchy with Twissjava 
     files from this checkout.
  + Compile everything.
  + java src/test/java/example/Start.java (starts Jetty, the appserver

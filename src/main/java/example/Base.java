@@ -23,7 +23,10 @@ import org.wyki.cassandra.pelops.Selector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * Base contains both the default header/footer things for the UI as
+ *   well as all the shared code for all the child controllers.
+ */
 public abstract class Base extends WebPage {
     final static Logger log = LoggerFactory.getLogger(Base.class);
     final ConsistencyLevel WCL = ConsistencyLevel.ONE;

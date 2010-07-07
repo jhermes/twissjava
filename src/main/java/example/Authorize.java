@@ -4,6 +4,10 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.PageParameters;
 
+/**
+ * Authorize allows viewers to log in as a user or create
+ *  a user account.
+ */
 public class Authorize extends Base {
     public Authorize(final PageParameters parameters) {
         super(parameters);
