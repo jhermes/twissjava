@@ -7,14 +7,20 @@ Deps:
    + Wicket: this is how we show other people the important thing.
 
 Setup:
- + `mvn archetype:create 
+ + Install Cassandra 0.6 from http://cassandra.apache.org/ as well
+    as its dependencies (Thrift). Copy the storage_conf.xml over
+    the default configuration and then start bin/cassandra.
+ + Install Pelops from http://code.google.com/p/pelops/ .
+ + Install Wicket with default packages and structure:
+   `mvn archetype:create 
      -DarchetypeGroupId=org.apache.wicket 
      -DarchetypeArtifactId=wicket-archetype-quickstart 
      -DarchetypeVersion=1.4.9 
      -DgroupId=example 
      -DartifactId=twissjava`
- + Replace default files with Twissjava files.
- + make
- + java src/test/java/example/Start.java
-     (starts Jetty, the appserver that comes with Wicket)
- + localhost:8080 :)
+ + Replace default files in the Wicket heirarchy with Twissjava 
+    files from this checkout.
+ + Compile everything.
+ + java src/test/java/example/Start.java (starts Jetty, the appserver
+    that comes with Wicket)
+ + localhost:8080
