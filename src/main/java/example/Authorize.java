@@ -19,6 +19,10 @@ public class Authorize extends Base {
         add(registerform);
     }
 
+    public void loginUser() {
+
+    }
+
     public void registerUser() {
         
     }
