@@ -29,8 +29,18 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Base extends WebPage {
     final static Logger log = LoggerFactory.getLogger(Base.class);
+
+    //CLs
     final ConsistencyLevel WCL = ConsistencyLevel.ONE;
     final ConsistencyLevel RCL = ConsistencyLevel.ONE;
+
+    //Column Family names
+    final static String USERS = "User";
+    final static String FRIENDS = "Friends";
+    final static String FOLLOWERS = "Followers";
+    final static String TWEETS = "Tweet";
+    final static String TIMELINE = "Timeline";
+    final static String USERLINE = "Userline";
 
     //UI settings
     public Base(final PageParameters parameters) {
@@ -50,6 +60,9 @@ public abstract class Base extends WebPage {
     }
     private Selector makeSel() {
         return Pelops.createSelector("Twissjava Pool", "Twissandra");
+    }
+    private SlicePredicate SPall(){
+        return Selector.newColumnsPredicateAll(false,5000);
     }
     private Mutator makeMut() {
         return Pelops.createMutator("Twissjava Pool", "Twissandra");
@@ -108,7 +121,7 @@ public abstract class Base extends WebPage {
         }
         Map<String, List<Column>> unordered_tweets = Collections.emptyMap();
         try {
-            unordered_tweets = selector.getColumnsFromRows(tweetids, COL_FAM, new SlicePredicate(), RCL);
+            unordered_tweets = selector.getColumnsFromRows(tweetids, TWEETS, SPall(), RCL);
         }
         catch (Exception e) {
             log.error("Unable to retrieve tweets from timeline for uname: " + uname);
@@ -128,7 +141,7 @@ public abstract class Base extends WebPage {
         Selector selector = makeSel();
         List<Column> usercols;
         try {
-            usercols = selector.getColumnsFromRow(uname, "USERS", new SlicePredicate(), RCL);
+            usercols = selector.getColumnsFromRow(uname, USERS, Selector.newColumnsPredicateAll(false,5000), RCL);
         }
         catch (Exception e) {
             log.error("Cannot find user by uname: " + uname);
@@ -141,14 +154,14 @@ public abstract class Base extends WebPage {
         return getFriendUnames(uname, 5000);
     }
     public List<String> getFriendUnames(String uname, int count) {
-        return getFriendOrFollowerUnames("FRIENDS", uname, count);
+        return getFriendOrFollowerUnames(FRIENDS, uname, count);
     }
 
     public List<String> getFollowerUnames(String uname) {
         return getFollowerUnames(uname, 5000);
     }
     public List<String> getFollowerUnames(String uname, int count) {
-        return getFriendOrFollowerUnames("FOLLOWERS", uname, count);
+        return getFriendOrFollowerUnames(FOLLOWERS, uname, count);
     }
 
     public List<User> getUsersForUnames(List<String> unames) {
@@ -156,7 +169,7 @@ public abstract class Base extends WebPage {
         List<User> users = Collections.emptyList();
         Map<String, List<Column>> data;
         try {
-            data = selector.getColumnsFromRows(unames, "USER", new SlicePredicate(), RCL);
+            data = selector.getColumnsFromRows(unames, USERS, SPall(), RCL);
         }
         catch (Exception e) {
             log.error("Cannot get users for unames: " + unames);
@@ -188,21 +201,21 @@ public abstract class Base extends WebPage {
         return getTimeline(uname, "", 40);
     }
     public Timeline getTimeline(String uname, String startkey, int limit) {
-        return getLine("TIMELINE", uname, startkey, limit);
+        return getLine(TIMELINE, uname, startkey, limit);
     }
 
     public Timeline getUserline(String uname) {
         return getUserline(uname, "", 40);
     }
     public Timeline getUserline(String uname, String startkey, int limit) {
-        return getLine("USERLINE", uname, startkey, limit);
+        return getLine(USERLINE, uname, startkey, limit);
     }
 
     public Tweet getTweet(String tweetid) {
         Selector selector = makeSel();
         List<Column> tweetcols;
         try {
-            tweetcols = selector.getColumnsFromRow(tweetid, "TWEETS", new SlicePredicate(), RCL);
+            tweetcols = selector.getColumnsFromRow(tweetid, TWEETS, SPall(), RCL);
         }
         catch (Exception e) {
             log.error("Could not locate tweet for id: " + tweetid);
@@ -217,7 +230,7 @@ public abstract class Base extends WebPage {
         Map<String, List<Column>> data;
         List<Tweet> tweets = Collections.emptyList();
         try {
-            data = selector.getColumnsFromRows(tweetids, "TWEETS", new SlicePredicate(), RCL);
+            data = selector.getColumnsFromRows(tweetids, TWEETS, SPall(), RCL);
         }
         catch (Exception e) {
             log.error("Cannot get tweets for tweetids: " + tweetids);
@@ -234,7 +247,7 @@ public abstract class Base extends WebPage {
     //Data Writing
     public void saveUser(User user) {
         Mutator mutator = makeMut();
-        mutator.writeColumn(bToS(user.getKey()), "USERS", mutator.newColumn("password",user.getPassword()));
+        mutator.writeColumn(bToS(user.getKey()), USERS, mutator.newColumn("password",user.getPassword()));
         try {
             mutator.execute(WCL);
         }
@@ -248,17 +261,17 @@ public abstract class Base extends WebPage {
 
         //Insert the tweet into tweets cf
         String key = bToS(tweet.getKey());
-        mutator.writeColumn(key, "TWEET", mutator.newColumn("uname",tweet.getUname()));
-        mutator.writeColumn(key, "TWEET", mutator.newColumn("body",tweet.getBody()));
+        mutator.writeColumn(key, TWEETS, mutator.newColumn("uname",tweet.getUname()));
+        mutator.writeColumn(key, TWEETS, mutator.newColumn("body",tweet.getBody()));
         //Insert into the user's timeline
-        mutator.writeColumn(tweet.getUname(), "USERLINE", mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        mutator.writeColumn(tweet.getUname(), USERLINE, mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
         //Insert into the public timeline
-        mutator.writeColumn("PUBLIC", "USERLINE", mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        mutator.writeColumn("!PUBLIC!", USERLINE, mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
         //Insert into all followers streams
         List<String> followerUnames = getFollowerUnames(tweet.getUname());
         followerUnames.add(tweet.getUname());
         for (String follower : followerUnames) {
-           mutator.writeColumn(follower, "TIMELINE", mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+           mutator.writeColumn(follower, TIMELINE, mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
         }
         try {
             mutator.execute(WCL);
@@ -274,9 +287,9 @@ public abstract class Base extends WebPage {
         List<Column> friends = Collections.emptyList();
         for (String uname : to_unames) {
             friends.add(mutator.newColumn(uname, String.valueOf(timestamp)));
-            mutator.writeColumn(uname, "FOLLOWERS", mutator.newColumn(from_uname, String.valueOf(timestamp)));
+            mutator.writeColumn(uname, FOLLOWERS, mutator.newColumn(from_uname, String.valueOf(timestamp)));
         }
-        mutator.writeColumns(from_uname, "FRIENDS", friends);
+        mutator.writeColumns(from_uname, FRIENDS, friends);
         try {
             mutator.execute(WCL);
         }
@@ -288,8 +301,8 @@ public abstract class Base extends WebPage {
     public void removeFriends(String from_uname, List<String> to_unames) {
         Mutator mutator = makeMut();
         for (String uname : to_unames) {
-            mutator.deleteColumn(from_uname, "FRIENDS", uname);
-            mutator.deleteColumn(uname, "FOLLOWERS", from_uname);
+            mutator.deleteColumn(from_uname, FRIENDS, uname);
+            mutator.deleteColumn(uname, FOLLOWERS, from_uname);
         }
     }
     

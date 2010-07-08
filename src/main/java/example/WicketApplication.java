@@ -12,7 +12,7 @@ public class WicketApplication extends WebApplication {
      * Constructor
      */
 	public WicketApplication() {
-        Pelops.addPool("Twissjava Pool", new String[] {"localhost"}, 9160, false, "not used", new Policy());        
+        Pelops.addPool("Twissjava Pool", new String[] {"127.0.0.1"}, 9160, false, "not used", new Policy());        
 	}
 	
 	/**

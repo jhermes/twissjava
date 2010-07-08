@@ -12,9 +12,6 @@ import org.apache.wicket.markup.html.WebPage;
 public class Userline extends HomePage {
     public Userline(final PageParameters parameters) {
         super(parameters);
-        if (this.getSession().isSessionInvalidated()) {
-            getRequestCycle().setRedirect(true);
-            setResponsePage(Publicline.class);
-        }
+ //           setResponsePage(Publicline.class);
     }
 }

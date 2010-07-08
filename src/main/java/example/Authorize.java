@@ -5,97 +5,76 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.model.PropertyModel;
 
 /**
  * Authorize allows viewers to log in as a user or create
  *  a user account.
  */
 public class Authorize extends Base {
-    private TextField username;
-    private PasswordTextField password;
-
-    private TextField new_username;
-    private PasswordTextField password1;
-    private PasswordTextField password2;
-
     public Authorize(final PageParameters parameters) {
         super(parameters);
-        //Make and define a LoginForm. Save the page data for getting later.
-        Form loginform = new LoginForm("login");
-        username = new TextField("username");
-        password = new PasswordTextField("password");
-        loginform.add(username);
-        loginform.add(password);
-        add(loginform);
-
+        //Make and define a LoginForm.
+        add(new LoginForm("login"));
         //Make and define a RegisterForm. Same as above.
-        Form registerform = new RegisterForm("signup");
-        new_username = new TextField("new_username");
-        password1 = new PasswordTextField("password1");
-        password2 = new PasswordTextField("password2");
-        registerform.add(new_username);
-        registerform.add(password1);
-        registerform.add(password2);
-        add(registerform);
+        add(new RegisterForm("signup"));
     }
 
-    class LoginForm extends Form {
+    private class LoginForm extends Form {
+        private String username;
+        private String password;
+
         public LoginForm(String id) {
             super(id);
+            add(new TextField("username", new PropertyModel(this,"username")));
+            add(new PasswordTextField("password", new PropertyModel(this,"password")));
         }
         @Override
         public void onSubmit() {
-            String uname = Authorize.this.getUsername();
-            User test = getUserByUsername(uname);
+            User test = getUserByUsername(username);
             if (test == null) {
+                //TODO : SHOW USER THE DOOR
                 System.out.println("Invalid username or password.");
                 return;
             }
-            String password = Authorize.this.getPassword();
             if (!test.comparePasswords(password)){
+                //TODO : SHOW USER THE DOOR
                 System.out.println("Invalid username or password.");
                 return;
             }
-            this.getSession().authorize(uname);
+            //TODO : LOG IN
+            System.out.println("Welcome back " + username);
         }
-    }
-    private String getUsername() {
-        return username.getModelObject().toString();
-    }
-    private String getPassword() {
-        return password.getModelObject();
     }
 
     class RegisterForm extends Form {
+        private String new_username;
+        private String password1;
+        private String password2;
+
         public RegisterForm(String id) {
             super(id);
+            add(new TextField("new_username", new PropertyModel(this,"new_username")));
+            add(new PasswordTextField("password1", new PropertyModel(this,"password1")));
+            add(new PasswordTextField("password2", new PropertyModel(this,"password2")));
         }
         @Override
         public void onSubmit() {
-            String uname = Authorize.this.getNewUsername();
-            User test = getUserByUsername(uname);
+            User test = getUserByUsername(new_username);
             if (test != null) {
+                //TODO : SHOW USER THE DOOR
                 System.out.println("Username already taken.");
                 return;
             }
-            String pass1 = Authorize.this.getPassword1();
-            String pass2 = Authorize.this.getPassword2();
-            if (!pass1.equals(pass2)) {
+            if (!password1.equals(password2)) {
+                //TODO : SHOW USER THE DOOR
                 System.out.println("Passwords do not match.");
                 return;
             }
-            test = new User(uname.getBytes(), pass1);
+            test = new User(new_username.getBytes(), password1);
             saveUser(test);
-            this.getSession().authorize(uname);
+            //TODO : REGISTER
+            System.out.println("Welcome " + new_username);
         }
-    }
-    private String getNewUsername() {
-        return new_username.getModelObject().toString();
-    }
-    private String getPassword1() {
-        return password1.getModelObject();
-    }
-    private String getPassword2() {
-        return password2.getModelObject();
     }
 }
