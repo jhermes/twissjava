@@ -1,0 +1,32 @@
+<html>
+<head></head>
+<body>
+  <wicket:extend>
+    <form method="POST" id="poster">
+      <div class="grid_9 alpha">
+                <textarea maxlength="140" name="body" type="text" id="id_body"></textarea>
+            </div>
+            <input type="submit" value="Post Tweet" class="grid_3 omega">
+            <div class="clear"></div>
+        </form>
+    <ul id="timeline" class="grid_9 alpha">
+        <!-- {% for tweet in tweets %} --
+            <li>
+                <a href="{% url userline tweet.uname %}" class="username">{{ tweet.uname }}</a>
+                <span class="body">{{ tweet.body|urlize }}</span>
+            </li>
+        {% empty %}
+            <li>There are no tweets yet.  Make sure to post one!</li>
+        {% endfor %}
+        {% if next %}
+            <li class="more"><a href="?start={{ next }}">More</a></li>
+        {% endif %}
+        -->
+         <li>
+           <a href="hermes" class="username">hermes</a>
+           <span class="body">Test!</span>
+         </li>
+    </ul>
+  </wicket:extend>
+</body>
+</html>

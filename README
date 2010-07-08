@@ -23,4 +23,4 @@ Setup:
  + Compile everything.
  + java src/test/java/example/Start.java (starts Jetty, the appserver
     that comes with Wicket)
- + localhost:8080
+ + localhost:8888
