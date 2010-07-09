@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.WebPage;
 
 import org.wyki.cassandra.pelops.Mutator;
+import org.wyki.cassandra.pelops.NumberHelper;
 import org.wyki.cassandra.pelops.Pelops;
 import org.wyki.cassandra.pelops.Selector;
 
@@ -61,11 +62,11 @@ public abstract class Base extends WebPage {
     private Selector makeSel() {
         return Pelops.createSelector("Twissjava Pool", "Twissandra");
     }
-    private SlicePredicate SPall(){
-        return Selector.newColumnsPredicateAll(false,5000);
-    }
     private Mutator makeMut() {
         return Pelops.createMutator("Twissjava Pool", "Twissandra");
+    }
+    private SlicePredicate SPall(){
+        return Selector.newColumnsPredicateAll(false,5000);
     }
     private Tweet makeTweet(byte[] key, List<Column> tweetcols) {
         return new Tweet(key, bToS(tweetcols.get(0).value), bToS(tweetcols.get(1).value));
@@ -264,14 +265,14 @@ public abstract class Base extends WebPage {
         mutator.writeColumn(key, TWEETS, mutator.newColumn("uname",tweet.getUname()));
         mutator.writeColumn(key, TWEETS, mutator.newColumn("body",tweet.getBody()));
         //Insert into the user's timeline
-        mutator.writeColumn(tweet.getUname(), USERLINE, mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        mutator.writeColumn(tweet.getUname(), USERLINE, mutator.newColumn(NumberHelper.toBytes(timestamp), key));
         //Insert into the public timeline
-        mutator.writeColumn("!PUBLIC!", USERLINE, mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+        mutator.writeColumn("!PUBLIC!", USERLINE, mutator.newColumn(NumberHelper.toBytes(timestamp), key));
         //Insert into all followers streams
         List<String> followerUnames = getFollowerUnames(tweet.getUname());
         followerUnames.add(tweet.getUname());
         for (String follower : followerUnames) {
-           mutator.writeColumn(follower, TIMELINE, mutator.newColumn(String.valueOf(timestamp), tweet.getKey()));
+           mutator.writeColumn(follower, TIMELINE, mutator.newColumn(NumberHelper.toBytes(timestamp), key));
         }
         try {
             mutator.execute(WCL);

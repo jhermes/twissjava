@@ -2,13 +2,14 @@
 <head></head>
 <body>
   <wicket:extend>
-    <form method="POST" id="poster">
+    <form wicket:id="poster">
       <div class="grid_9 alpha">
-                <textarea maxlength="140" name="body" type="text" id="id_body"></textarea>
-            </div>
-            <input type="submit" value="Post Tweet" class="grid_3 omega">
-            <div class="clear"></div>
-        </form>
+        <textarea maxlength="140" type="text" wicket:id="tweetbody"></textarea>
+      </div>
+      <input type="submit" value="Post Tweet" class="grid_3 omega">
+      <div class="clear"></div>
+    </form>
+
     <ul id="timeline" class="grid_9 alpha">
         <!-- {% for tweet in tweets %} --
             <li>
