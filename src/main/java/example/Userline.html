@@ -4,11 +4,20 @@
   <wicket:extend>
     <form wicket:id="poster">
       <div class="grid_9 alpha">
-        <textarea maxlength="140" type="text" wicket:id="tweetbody"></textarea>
+        <textarea maxlength="140" rows="4" cols="40" type="text" wicket:id="tweetbody"></textarea>
       </div>
       <input type="submit" value="Post Tweet" class="grid_3 omega">
       <div class="clear"></div>
     </form>
+
+    <span wicket:id="tweetlist" class="grid_9 alpha">
+        <ul>
+            <li>
+                <!-- TODO :  Fix this shit -->
+                <wicket:link></wicket:link><span class="body" wicket:id="tbody"></span>
+            </li>
+        </ul>
+    </span>
 
     <ul id="timeline" class="grid_9 alpha">
         <!-- {% for tweet in tweets %} --

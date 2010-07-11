@@ -22,7 +22,7 @@ public class Timeline {
         return view;
     }
 
-    public long getNextview()
+    public Long getNextview()
     {
         return nextview;
     }

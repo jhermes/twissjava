@@ -116,7 +116,7 @@ public abstract class Base extends WebPage {
             //eject column from list after saving the timestamp
             timeline.remove(removeme);
         }
-        List<String> tweetids = Collections.emptyList();
+        ArrayList<String> tweetids = new ArrayList<String>(timeline.size());
         for (Column c : timeline) {
             tweetids.add(bToS(c.value));
         }
