@@ -1,7 +1,10 @@
 package example.models;
 
+import java.io.Serializable;
 
-public class Tweet {
+
+public class Tweet implements Serializable
+{
     private byte[] key;
     private String uname;
     private String body;

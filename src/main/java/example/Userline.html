@@ -11,32 +11,12 @@
     </form>
 
     <span wicket:id="tweetlist" class="grid_9 alpha">
-        <ul>
-            <li>
-                <!-- TODO :  Fix this shit -->
-                <wicket:link></wicket:link><span class="body" wicket:id="tbody"></span>
-            </li>
-        </ul>
+      <ul>
+        <li>
+          <a href="#" wicket:id="link"><span wicket:id="tuname">name</span></a><span wicket:id="tbody">body</span>
+        </li>
+      </ul>
     </span>
-
-    <ul id="timeline" class="grid_9 alpha">
-        <!-- {% for tweet in tweets %} --
-            <li>
-                <a href="{% url userline tweet.uname %}" class="username">{{ tweet.uname }}</a>
-                <span class="body">{{ tweet.body|urlize }}</span>
-            </li>
-        {% empty %}
-            <li>There are no tweets yet.  Make sure to post one!</li>
-        {% endfor %}
-        {% if next %}
-            <li class="more"><a href="?start={{ next }}">More</a></li>
-        {% endif %}
-        -->
-         <li>
-           <a href="hermes" class="username">hermes</a>
-           <span class="body">Test!</span>
-         </li>
-    </ul>
   </wicket:extend>
 </body>
 </html>

@@ -1,12 +1,18 @@
 package example;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import example.models.Timeline;
 import example.models.Tweet;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
 import org.wyki.cassandra.pelops.UuidHelper;
 
@@ -30,16 +36,39 @@ public class Userline extends HomePage {
         add(new TweetForm("poster"));
 
         Timeline timeline = getTimeline(username);
-        List<Tweet> x = timeline.getView();
-        if (x.size() > 0) {
-            //TODO : Render tweets to the page
+        List<Tweet> tweets = timeline.getView();
+        if (tweets.size() > 0) {
+            add(new ListView<Tweet>("tweetlist", tweets) {
+                @Override
+                public void populateItem(final ListItem<Tweet> listitem) {
+                    listitem.add(new Link("link") {
+                        @Override
+                        public void onClick() {
+                            //TODO : link to TWISSJAVA/user page, alias to actual page
+                        }
+                    }.add(new Label("tuname",listitem.getModel().getObject().getUname())));
+                    listitem.add(new Label("tbody", ": " + listitem.getModel().getObject().getBody()));
+                }
+            }).setVersioned(false);
             Long linktopaginate = timeline.getNextview();
             if (linktopaginate != null) {
                 //TODO : Link the pagination
             }
         }
         else {
-            //TODO : Render "no tweets yet!"
+            ArrayList<String> hack = new ArrayList<String>(1);
+            hack.add("There are no tweets yet. Post one!");
+            add(new ListView<String>("tweetlist", hack ) {
+                @Override
+                public void populateItem(final ListItem<String> listitem) {
+                    listitem.add(new Link("link") {
+                        @Override
+                        public void onClick() {
+                        }
+                    }.add(new Label("tuname","")));
+                    listitem.add(new Label("tbody", listitem.getModel().getObject()));
+                }
+            }).setVersioned(false);
         }
     }
 
@@ -53,6 +82,7 @@ public class Userline extends HomePage {
         @Override
         public void onSubmit() {
             saveTweet(new Tweet(UuidHelper.newTimeUuid().toString().getBytes(), username, tweetbody));
+            setResponsePage(getPage().getClass());
         }
     }
 }

@@ -69,7 +69,7 @@ public abstract class Base extends WebPage {
         return Selector.newColumnsPredicateAll(false,5000);
     }
     private Tweet makeTweet(byte[] key, List<Column> tweetcols) {
-        return new Tweet(key, bToS(tweetcols.get(0).value), bToS(tweetcols.get(1).value));
+        return new Tweet(key, bToS(tweetcols.get(1).value), bToS(tweetcols.get(0).value));
     }
 
 
