@@ -21,14 +21,23 @@ public class Authorize extends Base {
         super(parameters);
         login = parameters.getAsBoolean("login",true);
         register = parameters.getAsBoolean("register");
-        //Make and define a LoginForm.
-        LoginForm l = new LoginForm("login");
-        l.add(new Label("loginerror",loginErrorMsg()));
-        add(l);
-        //Make and define a RegisterForm. Same as above.
-        RegisterForm r = new RegisterForm("signup");
-        r.add(new Label("regerror",registerErrorMsg()));
-        add(r);
+        TwissSession s = (TwissSession) WebSession.get();
+        if (s.getUname() != null) {
+            //User is logged in. Log them out and redirect to home page.
+            s.authorize(null);
+            setRedirect(true);
+            setResponsePage(getPage().getClass());
+        }
+        else {
+            //Make and define a LoginForm.
+            LoginForm l = new LoginForm("login");
+            l.add(new Label("loginerror",loginErrorMsg()));
+            add(l);
+            //Make and define a RegisterForm. Same as above.
+            RegisterForm r = new RegisterForm("signup");
+            r.add(new Label("regerror",registerErrorMsg()));
+            add(r);
+        }
     }
 
     private String loginErrorMsg() {

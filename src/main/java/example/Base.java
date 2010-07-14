@@ -16,6 +16,7 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.CSSPackageResource;
 import org.apache.wicket.markup.html.WebPage;
 
+import org.apache.wicket.protocol.http.WebSession;
 import org.wyki.cassandra.pelops.Mutator;
 import org.wyki.cassandra.pelops.NumberHelper;
 import org.wyki.cassandra.pelops.Pelops;
@@ -23,6 +24,7 @@ import org.wyki.cassandra.pelops.Selector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.wicket.markup.html.basic.Label;
 
 /**
  * Base contains both the default header/footer things for the UI as
@@ -49,6 +51,15 @@ public abstract class Base extends WebPage {
         add(CSSPackageResource.getHeaderContribution(Base.class, "reset.css"));
         add(CSSPackageResource.getHeaderContribution(Base.class, "screen.css"));
         add(CSSPackageResource.getHeaderContribution(Base.class, "text.css"));
+        String condauth = "Log";
+        String username = ((TwissSession)WebSession.get()).getUname();
+        if (username == null) {
+            condauth += "in";
+        }
+        else {
+            condauth += "out: " + username;
+        }
+        add(new Label("loginout", condauth));
     }
 
     //
