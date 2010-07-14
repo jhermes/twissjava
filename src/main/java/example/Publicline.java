@@ -17,9 +17,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.wyki.cassandra.pelops.UuidHelper;
 
 /**
- * This is the typical twitter page. A form for submitting a 140-character
- *  tweet, and all the tweets that user has made and tweets from everyone
- *  that he is following.
+ * This is the default home page when not logged in.
+ *  It contains the 40 most recent global tweets.
  */
 public class Publicline extends HomePage {
     private String username = "!PUBLIC!";

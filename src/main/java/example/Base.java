@@ -309,6 +309,12 @@ public abstract class Base extends WebPage {
             mutator.deleteColumn(from_uname, FRIENDS, uname);
             mutator.deleteColumn(uname, FOLLOWERS, from_uname);
         }
+        try {
+            mutator.execute(WCL);
+        }
+        catch (Exception e) {
+            log.error("Unable to remove friendship from: " + from_uname + ", to: " + to_unames);
+        }
     }
     
 }

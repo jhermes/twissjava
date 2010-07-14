@@ -40,7 +40,7 @@ public class AddFriends extends Base {
 
         WebMarkupContainer action = new WebMarkupContainer("action") {
             public boolean isVisible() {
-                return found != null;
+                return (found != null) && (found) && (!query.equals(username));
             }
         };
 
@@ -74,7 +74,6 @@ public class AddFriends extends Base {
                 return "Friendship was broken.";
             }
         }
-
         if (found != null) {
             if (!found) {
                 return query + " is not here.";
@@ -128,17 +127,18 @@ public class AddFriends extends Base {
         }
         @Override
         public void onSubmit() {
-            if (!found) {
+            List<String> friendUnames = getFriendUnames(username);
+            if (friendUnames.contains(query)) {
                 List<String> friendname = new ArrayList<String>();
                 friendname.add(query);
                 removeFriends(username, friendname);
-                setResponsePage(getPage().getClass(), new PageParameters("act=true"));
+                setResponsePage(getPage().getClass(), new PageParameters("act=false"));
             }
             else {
                 List<String> friendname = new ArrayList<String>();
                 friendname.add(query);
                 addFriends(username, friendname);
-                setResponsePage(getPage().getClass(), new PageParameters("act=false"));
+                setResponsePage(getPage().getClass(), new PageParameters("act=true"));
             }
         }
     }
