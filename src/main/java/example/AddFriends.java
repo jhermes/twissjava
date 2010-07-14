@@ -49,22 +49,20 @@ public class AddFriends extends Base {
         add(new Label("flash", getFlashMsg()));
 
         Form aff = new ActionFriendForm("actionfriend");
-        action.add(aff);
-        String buttontext = "";
-        if (found != null) {
-            if (query != username){
-                if (found) {
-                    buttontext = "Remove Friend";
-                }
-                else {
-                    buttontext = "Add Friend";
-                }
+
+        String actiontext = "";
+        List<String> friendUnames = getFriendUnames(username);
+        if (action.isVisible()) {
+            if (friendUnames.contains(query)) {
+                actiontext = "Remove Friend ";
+            }
+            else {
+                actiontext = "Add Friend ";
             }
         }
-        //TODO : Button text is wrong
-        Button submit = new Button("actionname");
-        submit.setModelValue(new String[] {buttontext,""});
-        aff.add(submit);
+        aff.add(new Label("actionname", actiontext));
+        
+        action.add(aff);
         add(action);
     }
 
