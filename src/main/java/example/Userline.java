@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.protocol.http.WebSession;
 import org.wyki.cassandra.pelops.UuidHelper;
 
 /**
@@ -29,13 +30,17 @@ public class Userline extends HomePage {
     public Userline(final PageParameters parameters) {
         super(parameters);
         nextpage = parameters.getAsLong("nextpage");
-        //TODO : get username from session, redirect if not logged in
-        username = "test";
+        username = ((TwissSession) WebSession.get()).getUname();
         if (username == null) {
             setRedirect(true);
             setResponsePage(Publicline.class);
         }
+        else {
+            setup();
+        }
+    }
 
+    private void setup() {
         add(new TweetForm("poster"));
 
         Timeline timeline = getTimeline(username, nextpage);

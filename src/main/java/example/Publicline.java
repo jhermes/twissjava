@@ -29,9 +29,6 @@ public class Publicline extends HomePage {
         super(parameters);
         nextpage = parameters.getAsLong("nextpage");
 
-        System.out.println("username: " + username);
-        System.out.println("nextpage: " + nextpage);
-
         Timeline timeline = getUserline(username, nextpage);
         List<Tweet> tweets = timeline.getView();
         if (tweets.size() > 0) {

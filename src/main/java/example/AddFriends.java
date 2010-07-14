@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.protocol.http.WebSession;
 
 /**
  * AddFriends has a query section for finding a user that may exist
@@ -20,15 +21,15 @@ import org.apache.wicket.markup.html.basic.Label;
  *   user if they exist. A user cannot friend himself.
  */
 public class AddFriends extends Base {
-    //TODO : Look up logged in username
-    private String username = "test";
-
+    private String username;
     private String query;
     private Boolean found;
     private Boolean act;
 
     public AddFriends(final PageParameters parameters) {
         super(parameters);
+        username = ((TwissSession) WebSession.get()).getUname();
+        
         query = parameters.getString("query");
         if (query == null) {
             query = "";
@@ -41,7 +42,7 @@ public class AddFriends extends Base {
         WebMarkupContainer action = new WebMarkupContainer("action") {
             @Override
             public boolean isVisible() {
-                return (found != null) && (found) && (!query.equals(username));
+                return (found != null) && (found) && (username != null) && (!query.equals(username));
             }
         };
 
@@ -60,6 +61,7 @@ public class AddFriends extends Base {
                 }
             }
         }
+        //TODO : Button text is wrong
         Button submit = new Button("actionname");
         submit.setModelValue(new String[] {buttontext,""});
         aff.add(submit);

@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.protocol.http.WebSession;
 
 /**
  * Authorize allows viewers to log in as a user or create
@@ -71,9 +72,10 @@ public class Authorize extends Base {
                 setResponsePage(getPage().getClass(), new PageParameters("login=false"));
                 return;
             }
-            //TODO : LOG IN
+            TwissSession s = (TwissSession) WebSession.get();
+            s.authorize(username);
             System.out.println("Welcome back " + username);
-            setResponsePage(getPage().getClass());
+            setResponsePage(Userline.class);
         }
     }
 
@@ -101,9 +103,10 @@ public class Authorize extends Base {
             }
             test = new User(new_username.getBytes(), password1);
             saveUser(test);
-            //TODO : REGISTER
+            TwissSession s = (TwissSession) WebSession.get();
+            s.authorize(new_username);
             System.out.println("Welcome " + new_username);
-            setResponsePage(getPage().getClass());
+            setResponsePage(Userline.class);
         }
     }
 }
