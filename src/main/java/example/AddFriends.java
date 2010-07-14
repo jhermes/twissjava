@@ -20,8 +20,11 @@ import org.apache.wicket.markup.html.basic.Label;
  *   user if they exist. A user cannot friend himself.
  */
 public class AddFriends extends Base {
+    //TODO : Look up logged in username
+    private String username = "test";
+
     private String query;
-    private Boolean friend;
+    private Boolean found;
     private Boolean act;
 
     public AddFriends(final PageParameters parameters) {
@@ -30,46 +33,63 @@ public class AddFriends extends Base {
         if (query == null) {
             query = "";
         }
-        friend = parameters.getAsBoolean("friend");
+        found = parameters.getAsBoolean("found");
         act = parameters.getAsBoolean("act");
-        //TODO : Remove these prints when you're done
-        System.out.println("*****");
-        System.out.println("query: " + query);
-        System.out.println("friend: " + friend);
-        System.out.println("act: " + act);
-        System.out.println("*****");
-
 
         add(new FriendForm("friendfinder"));
 
         WebMarkupContainer action = new WebMarkupContainer("action") {
             public boolean isVisible() {
-                return friend != null;
+                return found != null;
             }
         };
 
-        //TODO : Flash notices here!
-            //Act is false => "Friendship was broken."
-            //Act is true => "Friendship was established."
-            //friend is true => query + " is here!"
-            //friend is false => query + " is not here."
-            //friend is true && query == username => "You attempt to make friends with yourself and fail."
+        add(new Label("flash", getFlashMsg()));
 
         Form aff = new ActionFriendForm("actionfriend");
         action.add(aff);
         String buttontext = "";
-        if (friend != null) {
-            if (friend) {
-                buttontext = "Remove Friend";
-            }
-            else {
-                buttontext = "Add Friend";
+        if (found != null) {
+            if (query != username){
+                if (found) {
+                    buttontext = "Remove Friend";
+                }
+                else {
+                    buttontext = "Add Friend";
+                }
             }
         }
         Button submit = new Button("actionname");
         submit.setModelValue(new String[] {buttontext,""});
         aff.add(submit);
         add(action);
+    }
+
+    private String getFlashMsg() {
+        if (act != null) {
+            if (act) {
+                return "Friendship was established.";
+            }
+            if (!act) {
+                return "Friendship was broken.";
+            }
+        }
+
+        if (found != null) {
+            if (!found) {
+                return query + " is not here.";
+            }
+            if (found) {
+                if ((query != null) && (query.equals(username))) {
+                    return "You attempt to befriend yourself and fail.";
+                }
+                else {
+                    return query + " is here!";
+                }
+            }
+        }
+        //default nothing
+        return "";
     }
 
     private class FriendForm extends Form {
@@ -84,11 +104,15 @@ public class AddFriends extends Base {
             User test = getUserByUsername(q);
             if (test == null) {
                 //TODO : SHOW USER HAS NO FRIENDS, HA HA
+                PageParameters p = new PageParameters();
+                p.put("query",q);
+                p.put("found",false);
+                setResponsePage(getPage().getClass(), p);
             }
             else {
                 PageParameters p = new PageParameters();
                 p.put("query",q);
-                p.put("friend",true);
+                p.put("found",true);
                 setResponsePage(getPage().getClass(), p);
             }
         }
@@ -104,9 +128,7 @@ public class AddFriends extends Base {
         }
         @Override
         public void onSubmit() {
-            //TODO : Look up logged in username
-            String username = "test";
-            if (!friend) {
+            if (!found) {
                 List<String> friendname = new ArrayList<String>();
                 friendname.add(query);
                 removeFriends(username, friendname);

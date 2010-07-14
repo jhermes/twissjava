@@ -2,18 +2,20 @@
 <head></head>
 <body>
   <wicket:extend>
-    <h2 class="grid_4 suffix_5">Add Friends</h2>
+    <h2 class="grid_4 suffix_5">Find Friends</h2>
     <div class="grid_9 alpha">
         <form method="GET" class="grid_6" wicket:id='friendfinder'>
             <input wicket:id="q" type="text"/>
             <input type="submit" value="Search" />
         </form>
+        <div class="grid_6">
+            <p wicket:id="flash">hello</p>
+        </div>
         <div class="grid_6" wicket:id="action">
             <form wicket:id='actionfriend'>
                 <input wicket:id="actionname" type="submit" value="." />
             </form>
         </div>
-        
     </div>
   </wicket:extend>
 </body>
