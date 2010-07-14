@@ -101,8 +101,8 @@
        ~ your data set!
       -->
       <ColumnFamily CompareWith="UTF8Type" Name="User"/>
-      <ColumnFamily CompareWith="BytesType" Name="Friends"/>
-      <ColumnFamily CompareWith="BytesType" Name="Followers"/>
+      <ColumnFamily CompareWith="UTF8Type" Name="Friends"/>
+      <ColumnFamily CompareWith="UTF8Type" Name="Followers"/>
       <ColumnFamily CompareWith="UTF8Type" Name="Tweet"/>
       <ColumnFamily CompareWith="LongType" Name="Timeline"/>
       <ColumnFamily CompareWith="LongType" Name="Userline"/>

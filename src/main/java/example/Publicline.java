@@ -7,6 +7,7 @@ import java.util.List;
 import example.models.Timeline;
 import example.models.Tweet;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -22,10 +23,16 @@ import org.wyki.cassandra.pelops.UuidHelper;
  */
 public class Publicline extends HomePage {
     private String username = "!PUBLIC!";
+    private Long nextpage;
 
     public Publicline(final PageParameters parameters) {
         super(parameters);
-        Timeline timeline = getUserline(username);
+        nextpage = parameters.getAsLong("nextpage");
+
+        System.out.println("username: " + username);
+        System.out.println("nextpage: " + nextpage);
+
+        Timeline timeline = getUserline(username, nextpage);
         List<Tweet> tweets = timeline.getView();
         if (tweets.size() > 0) {
             add(new ListView<Tweet>("tweetlist", tweets) {
@@ -42,7 +49,19 @@ public class Publicline extends HomePage {
             }).setVersioned(false);
             Long linktopaginate = timeline.getNextview();
             if (linktopaginate != null) {
-                //TODO : Link the pagination
+                nextpage = linktopaginate;
+                WebMarkupContainer pagediv = new WebMarkupContainer("pagedown");
+                PageForm pager = new PageForm("pageform");
+                pagediv.add(pager);
+                add(pagediv);
+            }
+            else {
+                add(new WebMarkupContainer("pagedown") {
+                    @Override
+                    public boolean isVisible() {
+                        return false;
+                    }
+                });
             }
         }
         else {
@@ -59,6 +78,24 @@ public class Publicline extends HomePage {
                     listitem.add(new Label("tbody", listitem.getModel().getObject()));
                 }
             }).setVersioned(false);
+            add(new WebMarkupContainer("pagedown") {
+                @Override
+                public boolean isVisible() {
+                    return false;
+                }
+            });
+        }
+    }
+
+    private class PageForm extends Form {
+        public PageForm(String id) {
+            super(id);
+        }
+        @Override
+        public void onSubmit() {
+            PageParameters p = new PageParameters();
+            p.put("nextpage", nextpage);
+            setResponsePage(getPage().getClass(), p);
         }
     }
 }

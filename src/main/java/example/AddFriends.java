@@ -39,6 +39,7 @@ public class AddFriends extends Base {
         add(new FriendForm("friendfinder"));
 
         WebMarkupContainer action = new WebMarkupContainer("action") {
+            @Override
             public boolean isVisible() {
                 return (found != null) && (found) && (!query.equals(username));
             }

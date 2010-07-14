@@ -94,8 +94,9 @@ public abstract class Base extends WebPage {
     private Timeline getLine(String COL_FAM, String uname, String startkey, int count) {
         Selector selector = makeSel();
         List<Column> timeline;
+        byte[] longTypeStartKey = (startkey.equals("") ? new byte[0] : NumberHelper.toBytes(Long.parseLong(startkey)));
         try {
-            timeline = selector.getColumnsFromRow(uname, COL_FAM, Selector.newColumnsPredicateAll(true, count+1), RCL);
+            timeline = selector.getColumnsFromRow(uname, COL_FAM, Selector.newColumnsPredicate(longTypeStartKey,new byte[0],true,count+1), RCL);
         }
         catch (Exception e) {
             log.error("Unable to retrieve timeline for uname: " + uname);
@@ -205,12 +206,20 @@ public abstract class Base extends WebPage {
     public Timeline getTimeline(String uname) {
         return getTimeline(uname, "", 40);
     }
+    public Timeline getTimeline(String uname, Long startkey) {
+        String longAsStr = (startkey == null) ? "" : String.valueOf(startkey);
+        return getTimeline(uname, longAsStr, 40);
+    }
     public Timeline getTimeline(String uname, String startkey, int limit) {
         return getLine(TIMELINE, uname, startkey, limit);
     }
 
     public Timeline getUserline(String uname) {
         return getUserline(uname, "", 40);
+    }
+    public Timeline getUserline(String uname, Long startkey) {
+        String longAsStr = (startkey == null) ? "" : String.valueOf(startkey);
+        return getUserline(uname, longAsStr, 40);
     }
     public Timeline getUserline(String uname, String startkey, int limit) {
         return getLine(USERLINE, uname, startkey, limit);

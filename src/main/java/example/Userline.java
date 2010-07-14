@@ -7,6 +7,7 @@ import java.util.List;
 import example.models.Timeline;
 import example.models.Tweet;
 import org.apache.wicket.PageParameters;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -23,9 +24,11 @@ import org.wyki.cassandra.pelops.UuidHelper;
  */
 public class Userline extends HomePage {
     private String username;
+    private Long nextpage;
 
     public Userline(final PageParameters parameters) {
         super(parameters);
+        nextpage = parameters.getAsLong("nextpage");
         //TODO : get username from session, redirect if not logged in
         username = "test";
         if (username == null) {
@@ -35,7 +38,7 @@ public class Userline extends HomePage {
 
         add(new TweetForm("poster"));
 
-        Timeline timeline = getTimeline(username);
+        Timeline timeline = getTimeline(username, nextpage);
         List<Tweet> tweets = timeline.getView();
         if (tweets.size() > 0) {
             add(new ListView<Tweet>("tweetlist", tweets) {
@@ -52,7 +55,19 @@ public class Userline extends HomePage {
             }).setVersioned(false);
             Long linktopaginate = timeline.getNextview();
             if (linktopaginate != null) {
-                //TODO : Link the pagination
+                nextpage = linktopaginate;
+                WebMarkupContainer pagediv = new WebMarkupContainer("pagedown");
+                PageForm pager = new PageForm("pageform");
+                pagediv.add(pager);
+                add(pagediv);
+            }
+            else {
+                add(new WebMarkupContainer("pagedown") {
+                    @Override
+                    public boolean isVisible() {
+                        return false;
+                    }
+                });
             }
         }
         else {
@@ -69,6 +84,24 @@ public class Userline extends HomePage {
                     listitem.add(new Label("tbody", listitem.getModel().getObject()));
                 }
             }).setVersioned(false);
+            add(new WebMarkupContainer("pagedown") {
+                @Override
+                public boolean isVisible() {
+                    return false;
+                }
+            });
+        }
+    }
+
+    private class PageForm extends Form {
+        public PageForm(String id) {
+            super(id);
+        }
+        @Override
+        public void onSubmit() {
+            PageParameters p = new PageParameters();
+            p.put("nextpage", nextpage);
+            setResponsePage(getPage().getClass(), p);
         }
     }
 
