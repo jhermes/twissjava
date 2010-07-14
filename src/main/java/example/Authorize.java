@@ -83,7 +83,6 @@ public class Authorize extends Base {
             }
             TwissSession s = (TwissSession) WebSession.get();
             s.authorize(username);
-            System.out.println("Welcome back " + username);
             setResponsePage(Userline.class);
         }
     }
@@ -114,7 +113,6 @@ public class Authorize extends Base {
             saveUser(test);
             TwissSession s = (TwissSession) WebSession.get();
             s.authorize(new_username);
-            System.out.println("Welcome " + new_username);
             setResponsePage(Userline.class);
         }
     }

@@ -51,6 +51,7 @@ public abstract class Base extends WebPage {
         add(CSSPackageResource.getHeaderContribution(Base.class, "reset.css"));
         add(CSSPackageResource.getHeaderContribution(Base.class, "screen.css"));
         add(CSSPackageResource.getHeaderContribution(Base.class, "text.css"));
+        
         String condauth = "Log";
         String username = ((TwissSession)WebSession.get()).getUname();
         if (username == null) {
