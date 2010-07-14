@@ -1,6 +1,7 @@
 package example;
 
 import example.models.User;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.TextField;
@@ -12,12 +13,42 @@ import org.apache.wicket.model.PropertyModel;
  *  a user account.
  */
 public class Authorize extends Base {
+    private Boolean login;
+    private Boolean register;
+
     public Authorize(final PageParameters parameters) {
         super(parameters);
+        login = parameters.getAsBoolean("login",true);
+        register = parameters.getAsBoolean("register");
         //Make and define a LoginForm.
-        add(new LoginForm("login"));
+        LoginForm l = new LoginForm("login");
+        l.add(new Label("loginerror",loginErrorMsg()));
+        add(l);
         //Make and define a RegisterForm. Same as above.
-        add(new RegisterForm("signup"));
+        RegisterForm r = new RegisterForm("signup");
+        r.add(new Label("regerror",registerErrorMsg()));
+        add(r);
+    }
+
+    private String loginErrorMsg() {
+        //get login param
+        if (!login) {
+            return "Invalid username/password entered.";
+        }
+        return "";
+    }
+
+    private String registerErrorMsg() {
+        //get regis param
+        if (register != null) {
+            if (register) {
+                return "Username already taken.";
+            }
+            else {
+                return "Passwords do not match.";
+            }
+        }
+        return "";
     }
 
     private class LoginForm extends Form {
@@ -33,17 +64,16 @@ public class Authorize extends Base {
         public void onSubmit() {
             User test = getUserByUsername(username);
             if (test == null) {
-                //TODO : SHOW USER THE DOOR
-                System.out.println("Invalid username or password.");
+                setResponsePage(getPage().getClass(), new PageParameters("login=false"));
                 return;
             }
             if (!test.comparePasswords(password)){
-                //TODO : SHOW USER THE DOOR
-                System.out.println("Invalid username or password.");
+                setResponsePage(getPage().getClass(), new PageParameters("login=false"));
                 return;
             }
             //TODO : LOG IN
             System.out.println("Welcome back " + username);
+            setResponsePage(getPage().getClass());
         }
     }
 
@@ -62,19 +92,18 @@ public class Authorize extends Base {
         public void onSubmit() {
             User test = getUserByUsername(new_username);
             if (test != null) {
-                //TODO : SHOW USER THE DOOR
-                System.out.println("Username already taken.");
+                setResponsePage(getPage().getClass(), new PageParameters("register=true"));
                 return;
             }
             if (!password1.equals(password2)) {
-                //TODO : SHOW USER THE DOOR
-                System.out.println("Passwords do not match.");
+                setResponsePage(getPage().getClass(), new PageParameters("register=false"));
                 return;
             }
             test = new User(new_username.getBytes(), password1);
             saveUser(test);
             //TODO : REGISTER
             System.out.println("Welcome " + new_username);
+            setResponsePage(getPage().getClass());
         }
     }
 }

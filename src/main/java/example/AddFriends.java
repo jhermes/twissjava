@@ -102,7 +102,6 @@ public class AddFriends extends Base {
         public void onSubmit() {
             User test = getUserByUsername(q);
             if (test == null) {
-                //TODO : SHOW USER HAS NO FRIENDS, HA HA
                 PageParameters p = new PageParameters();
                 p.put("query",q);
                 p.put("found",false);
