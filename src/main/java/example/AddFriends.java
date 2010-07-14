@@ -1,10 +1,17 @@
 package example;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import example.models.User;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.basic.Label;
 
 /**
@@ -14,7 +21,8 @@ import org.apache.wicket.markup.html.basic.Label;
  */
 public class AddFriends extends Base {
     private String query;
-    private String username;
+    private Boolean friend;
+    private Boolean act;
 
     public AddFriends(final PageParameters parameters) {
         super(parameters);
@@ -22,20 +30,45 @@ public class AddFriends extends Base {
         if (query == null) {
             query = "";
         }
+        friend = parameters.getAsBoolean("friend");
+        act = parameters.getAsBoolean("act");
+        //TODO : Remove these prints when you're done
+        System.out.println("*****");
+        System.out.println("query: " + query);
+        System.out.println("friend: " + friend);
+        System.out.println("act: " + act);
+        System.out.println("*****");
+
+
         add(new FriendForm("friendfinder"));
-        add(new ActionFriendForm("actionfriend"));
+
         WebMarkupContainer action = new WebMarkupContainer("action") {
             public boolean isVisible() {
-                return !query.equals("");
+                return friend != null;
             }
         };
-        boolean friend = parameters.getAsBoolean("friend",false);
-        if (friend) {
-            action.add(new Label("actionname","Remove Friend"));
+
+        //TODO : Flash notices here!
+            //Act is false => "Friendship was broken."
+            //Act is true => "Friendship was established."
+            //friend is true => query + " is here!"
+            //friend is false => query + " is not here."
+            //friend is true && query == username => "You attempt to make friends with yourself and fail."
+
+        Form aff = new ActionFriendForm("actionfriend");
+        action.add(aff);
+        String buttontext = "";
+        if (friend != null) {
+            if (friend) {
+                buttontext = "Remove Friend";
+            }
+            else {
+                buttontext = "Add Friend";
+            }
         }
-        else {
-            action.add(new Label("actionname","Add Friend"));
-        }
+        Button submit = new Button("actionname");
+        submit.setModelValue(new String[] {buttontext,""});
+        aff.add(submit);
         add(action);
     }
 
@@ -48,9 +81,17 @@ public class AddFriends extends Base {
         }
         @Override
         public void onSubmit() {
-            //TODO : Find that friend!  
+            User test = getUserByUsername(q);
+            if (test == null) {
+                //TODO : SHOW USER HAS NO FRIENDS, HA HA
+            }
+            else {
+                PageParameters p = new PageParameters();
+                p.put("query",q);
+                p.put("friend",true);
+                setResponsePage(getPage().getClass(), p);
+            }
         }
-
     }
 
     //<p>Hooray, this page exists!</p>
@@ -63,7 +104,20 @@ public class AddFriends extends Base {
         }
         @Override
         public void onSubmit() {
-            //TODO : Add or Remove that Friend!
+            //TODO : Look up logged in username
+            String username = "test";
+            if (!friend) {
+                List<String> friendname = new ArrayList<String>();
+                friendname.add(query);
+                removeFriends(username, friendname);
+                setResponsePage(getPage().getClass(), new PageParameters("act=true"));
+            }
+            else {
+                List<String> friendname = new ArrayList<String>();
+                friendname.add(query);
+                addFriends(username, friendname);
+                setResponsePage(getPage().getClass(), new PageParameters("act=false"));
+            }
         }
     }
 }

@@ -4,13 +4,13 @@
   <wicket:extend>
     <h2 class="grid_4 suffix_5">Add Friends</h2>
     <div class="grid_9 alpha">
-        <form wicket:id='friendfinder'method="GET" class="grid_6">
+        <form method="GET" class="grid_6" wicket:id='friendfinder'>
             <input wicket:id="q" type="text"/>
             <input type="submit" value="Search" />
         </form>
-        <div wicket:id="action" class="grid_6">
+        <div class="grid_6" wicket:id="action">
             <form wicket:id='actionfriend'>
-                <input wicket:id="actionname" type="submit" />
+                <input wicket:id="actionname" type="submit" value="." />
             </form>
         </div>
         

@@ -148,6 +148,10 @@ public abstract class Base extends WebPage {
             log.error("Cannot find user by uname: " + uname);
             return null;
         }
+        if (usercols.size() == 0) {
+            log.error("User does not exist: " + uname);
+            return null;
+        }
         return new User(uname.getBytes(), bToS(usercols.get(0).value));
     }
 
@@ -167,7 +171,7 @@ public abstract class Base extends WebPage {
 
     public List<User> getUsersForUnames(List<String> unames) {
         Selector selector = makeSel();
-        List<User> users = Collections.emptyList();
+        ArrayList<User> users = new ArrayList<User>();
         Map<String, List<Column>> data;
         try {
             data = selector.getColumnsFromRows(unames, USERS, SPall(), RCL);
@@ -229,7 +233,7 @@ public abstract class Base extends WebPage {
     public List<Tweet> getTweetsForTweetids(List<String> tweetids) {
         Selector selector = makeSel();
         Map<String, List<Column>> data;
-        List<Tweet> tweets = Collections.emptyList();
+        ArrayList<Tweet> tweets = new ArrayList<Tweet>();
         try {
             data = selector.getColumnsFromRows(tweetids, TWEETS, SPall(), RCL);
         }
@@ -269,7 +273,7 @@ public abstract class Base extends WebPage {
         //Insert into the public timeline
         mutator.writeColumn("!PUBLIC!", USERLINE, mutator.newColumn(NumberHelper.toBytes(timestamp), key));
         //Insert into all followers streams
-        List<String> followerUnames = getFollowerUnames(tweet.getUname());
+        ArrayList<String> followerUnames = new ArrayList<String>(getFollowerUnames(tweet.getUname()));
         followerUnames.add(tweet.getUname());
         for (String follower : followerUnames) {
            mutator.writeColumn(follower, TIMELINE, mutator.newColumn(NumberHelper.toBytes(timestamp), key));
@@ -285,7 +289,7 @@ public abstract class Base extends WebPage {
     public void addFriends(String from_uname, List<String> to_unames) {
         long timestamp = System.currentTimeMillis();
         Mutator mutator = makeMut();
-        List<Column> friends = Collections.emptyList();
+        ArrayList<Column> friends = new ArrayList<Column>();
         for (String uname : to_unames) {
             friends.add(mutator.newColumn(uname, String.valueOf(timestamp)));
             mutator.writeColumn(uname, FOLLOWERS, mutator.newColumn(from_uname, String.valueOf(timestamp)));
