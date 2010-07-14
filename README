@@ -8,9 +8,8 @@ Deps:
 
 Setup:
  + Install Cassandra 0.6 from http://cassandra.apache.org/ as well
-    as its dependencies (Thrift). Copy the storage_conf.xml over
-    the default configuration and then start bin/cassandra.
- + Install Pelops from http://code.google.com/p/pelops/ .
+    as its dependencies (Thrift). 
+   + Copy the storage_conf.xml over the default configuration
  + Install Wicket with default packages and structure:
    `mvn archetype:create 
      -DarchetypeGroupId=org.apache.wicket 
@@ -20,7 +19,11 @@ Setup:
      -DartifactId=twissjava`
  + Replace default files in the Wicket hierarchy with Twissjava 
     files from this checkout.
- + Compile everything.
- + java src/test/java/example/Start.java (starts Jetty, the appserver
-    that comes with Wicket)
+ + Include Pelops as a library from http://code.google.com/p/pelops/
+
+Start:
+ + Start bin/cassandra
+ + java src/test/java/example/Start.java (starts Jetty, our appserver)
+   + NOTE: Jetty uses port 8080 by default, which is used for JMX
+       for Cassandra. Start.java in this checkout has it changed to 8888.
  + localhost:8888
