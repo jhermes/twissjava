@@ -61,7 +61,7 @@ public class AddFriends extends Base {
             }
         }
         aff.add(new Label("actionname", actiontext));
-        
+        //TODO : I really don't like not having it on the button itself. ;_;
         action.add(aff);
         add(action);
     }

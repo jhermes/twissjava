@@ -22,12 +22,20 @@ import org.wyki.cassandra.pelops.UuidHelper;
  *  It contains the 40 most recent global tweets.
  */
 public class Publicline extends HomePage {
-    private String username = "!PUBLIC!";
+    private String username;
     private Long nextpage;
 
     public Publicline(final PageParameters parameters) {
         super(parameters);
         nextpage = parameters.getAsLong("nextpage");
+        username = parameters.getString("username");
+        if (username == null) {
+            username = "!PUBLIC!";
+            add(new Label("h2name", "Public"));
+        }
+        else {
+            add(new Label("h2name", username + "'s"));
+        }
 
         Timeline timeline = getUserline(username, nextpage);
         List<Tweet> tweets = timeline.getView();
@@ -38,7 +46,9 @@ public class Publicline extends HomePage {
                     listitem.add(new Link("link") {
                         @Override
                         public void onClick() {
-                            //TODO : link to TWISSJAVA/user page, alias to actual page
+                            PageParameters p = new PageParameters();
+                            p.put("username", listitem.getModel().getObject().getUname());
+                            setResponsePage(Publicline.class, p);
                         }
                     }.add(new Label("tuname",listitem.getModel().getObject().getUname())));
                     listitem.add(new Label("tbody", ": " + listitem.getModel().getObject().getBody()));

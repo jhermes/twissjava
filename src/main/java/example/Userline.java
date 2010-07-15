@@ -52,7 +52,9 @@ public class Userline extends HomePage {
                     listitem.add(new Link("link") {
                         @Override
                         public void onClick() {
-                            //TODO : link to TWISSJAVA/user page, alias to actual page
+                            PageParameters p = new PageParameters();
+                            p.put("username", listitem.getModel().getObject().getUname());
+                            setResponsePage(Publicline.class, p);
                         }
                     }.add(new Label("tuname",listitem.getModel().getObject().getUname())));
                     listitem.add(new Label("tbody", ": " + listitem.getModel().getObject().getBody()));
